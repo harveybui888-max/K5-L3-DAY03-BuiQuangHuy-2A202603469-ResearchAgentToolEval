@@ -16,12 +16,17 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: >-
+      Ask the user for missing required information or explicit confirmation before
+      an external action. Always set response_type explicitly: "text" for missing
+      details, "yes_no" for confirmation, or "choice" for a choice question.
+      Do not call the requested action tool until the user supplies the information
+      or confirms.
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
+        question: {type: string, default: "", description: "Câu hỏi cụ thể, ngắn gọn cho người dùng"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Bắt buộc truyền tường minh: text để xin thông tin, yes_no để xin xác nhận, choice để hỏi lựa chọn"}
         options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
       required: [question]
 
@@ -86,12 +91,16 @@ tools:
 
   # ---------------- Bonus tools ----------------
   - name: send
-    description: "Gửi một đoạn văn bản đi."
+    description: >-
+      Send the exact text to the configured Telegram destination. Only call after
+      the user explicitly confirms the exact message in a later turn; pass
+      confirmed=true. A request to send is not itself confirmation. If the
+      message or confirmation is missing, ask with clarify and do not send.
     parameters:
       type: object
       properties:
         text: {type: string, default: "", description: "Nội dung"}
-        confirmed: {type: boolean, default: false, description: "Cờ xác nhận"}
+        confirmed: {type: boolean, default: false, description: "Must be true only after explicit user confirmation of this exact text"}
       required: [text]
 
   - name: policy
@@ -131,8 +140,11 @@ tools:
       the user asks to deduplicate sources and items already exist in the request
       or previous tool results. Preserve the first occurrence, original item order,
       URLs and metadata. Ignore tracking parameters and fragments when comparing.
-      Local only: does not search, fetch, summarize or format. Never invent items;
-      ask clarify if they are missing. Pass the returned items to format if needed.
+      The items list must contain actual source objects; never call with [] or
+      invented items. If no items are available, first call clarify with
+      response_type="text" to ask the user for them. Local only: does not search,
+      fetch, summarize or format. Pass the returned items to format only if a digest
+      was requested.
     parameters:
       type: object
       properties:
