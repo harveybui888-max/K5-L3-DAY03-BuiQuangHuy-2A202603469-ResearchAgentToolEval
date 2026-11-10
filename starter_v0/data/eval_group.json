@@ -13,6 +13,42 @@
       "metadata": {"what_it_tests": "Route supplied source items to deduplicate instead of search, fetch or format. Exact item forwarding is covered by offline integration tests."}
     },
     {
+      "id": "G01_arxiv_papers_routing",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm các bài báo khoa học trên arXiv về retrieval augmented generation.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "papers", "args": {}}]},
+      "metadata": {"skill": "arxiv_papers_routing", "difficulty": "medium", "what_it_tests": "Yêu cầu tìm paper/preprint → route tới papers (arXiv), không dùng lookup hay social_search."}
+    },
+    {
+      "id": "G02_arxiv_paper_text_arg",
+      "phase": "B",
+      "suite": "group",
+      "query": "Đọc giúp mình nội dung paper arXiv 2312.10997, chỉ 3 trang đầu.",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "paper_text", "args": {"arxiv_url": "2312.10997", "max_pages": 3}}]},
+      "metadata": {"skill": "arxiv_paper_text_arg", "difficulty": "hard", "what_it_tests": "Có arXiv ID + '3 trang đầu' → paper_text với arxiv_url=2312.10997 và max_pages=3."}
+    },
+    {
+      "id": "G03_policy_external_publishing",
+      "phase": "B",
+      "suite": "group",
+      "query": "Theo policy nội bộ, mình có được tự ý đăng bản tin lên Telegram không?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "external_publishing"}}]},
+      "metadata": {"skill": "policy_external_publishing", "difficulty": "medium", "what_it_tests": "Câu hỏi quy định xuất bản ra ngoài → policy với policy_area=external_publishing."}
+    },
+    {
+      "id": "G04_dedup_missing_items_clarify",
+      "phase": "B",
+      "suite": "group",
+      "query": "Gộp giúp mình các nguồn bị trùng lặp.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "dedup_missing_items_clarify", "difficulty": "medium", "what_it_tests": "Yêu cầu deduplicate nhưng chưa cung cấp items → clarify xin dữ liệu, không bịa items hay gọi deduplicate với danh sách rỗng."}
+    },
+    {
       "id": "TOOLV2_DEDUP_02_sources_from_context",
       "phase": "B",
       "turns": [
@@ -22,6 +58,54 @@
       "failure_type": "wrong_tool",
       "expect": {"tool_calls": [{"name": "deduplicate", "args": {}}]},
       "metadata": {"what_it_tests": "Route existing context items to the new tool without inventing sources or running an earlier formatting request."}
+    },
+    {
+      "id": "G05_multiturn_papers_to_paper_text",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tìm giúp mình paper nổi tiếng về attention mechanism"},
+        {"role": "user", "content": "Đọc giúp mình nội dung paper 1706.03762"}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "paper_text", "args": {"arxiv_url": "1706.03762"}}]},
+      "metadata": {"skill": "multiturn_papers_to_paper_text", "difficulty": "hard", "what_it_tests": "Sau khi tìm paper, user đưa arXiv ID cụ thể → chuyển sang paper_text để đọc nội dung, không gọi papers lần nữa."}
+    },
+    {
+      "id": "G06_multiturn_send_confirmation",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Đăng bản tin 'AI news digest' lên Telegram giúp mình"},
+        {"role": "user", "content": "Đã xác nhận, bạn gửi đi nhé"}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "send", "args": {"confirmed": true}}]},
+      "metadata": {"skill": "multiturn_send_confirmation", "difficulty": "medium", "what_it_tests": "Hành động gửi cần xác nhận: lượt 1 yêu cầu gửi, lượt 2 user xác nhận → send với confirmed=true."}
+    },
+    {
+      "id": "G07_multiturn_papers_limit_correction",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tìm paper về AI agent evaluation"},
+        {"role": "user", "content": "Chỉ cần 3 kết quả thôi nhé"}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "papers", "args": {"max_results": 3}}]},
+      "metadata": {"skill": "multiturn_papers_limit_correction", "difficulty": "hard", "what_it_tests": "Carry chủ đề 'AI agent evaluation' từ lượt 1 + sửa max_results thành 3 từ lượt 2."}
+    },
+    {
+      "id": "G08_multiturn_dedup_after_items",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Bỏ giúp mình các nguồn trùng lặp"},
+        {"role": "user", "content": "Đây là danh sách nguồn: [{\"title\":\"First\",\"url\":\"https://example.com/a?utm_source=mail\"},{\"title\":\"Again\",\"url\":\"https://example.com/a#intro\"}]"}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "deduplicate", "args": {}}]},
+      "metadata": {"skill": "multiturn_dedup_after_items", "difficulty": "hard", "what_it_tests": "Lượt 1 thiếu items (nên clarify), lượt 2 user cung cấp items → route tới deduplicate."}
     }
   ]
 }
