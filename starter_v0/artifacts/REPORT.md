@@ -22,6 +22,8 @@
 
 Link ngrok phụ thuộc vào phiên tunnel đang chạy; nếu tunnel dừng hoặc URL thay đổi, hãy cập nhật link này.
 
+Trong UI, mục **Version để xem** cho phép chọn v0–v3 để xem metric/run đã lưu. Version chưa có run sẽ hiện trạng thái chưa có bằng chứng; phần chat luôn dùng prompt/tools hiện có trong workspace, không tự khôi phục snapshot lịch sử.
+
 ## A2. Tool agent có
 
 > Liệt kê các tool agent đang dùng (gồm tool mới nhóm tự thêm). Mỗi tool 1 dòng: tên + làm được gì.

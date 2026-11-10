@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import json
 from pathlib import Path
 from typing import Any
@@ -20,8 +21,28 @@ DEFAULT_MODELS = {
     "openrouter": "openai/gpt-4o-mini",
     "ollama": "qwen2.5:7b",
 }
+VERSIONS = ["v0", "v1", "v2", "v3"]
 
 load_lab_env(ROOT)
+
+
+def load_version_evidence(version: str) -> tuple[dict[str, str] | None, dict[str, Any] | None]:
+    version_log = ARTIFACTS_DIR / "version_log.csv"
+    if not version_log.exists():
+        return None, None
+
+    with version_log.open(encoding="utf-8", newline="") as file:
+        entry = next(
+            (row for row in csv.DictReader(file) if row.get("version") == version),
+            None,
+        )
+    if entry is None or not entry.get("run_file"):
+        return entry, None
+
+    run_path = ROOT / entry["run_file"]
+    if not run_path.exists():
+        return entry, None
+    return entry, json.loads(run_path.read_text(encoding="utf-8"))
 
 
 def execute_demo_tool(call: ToolCall) -> dict[str, Any]:
@@ -44,17 +65,62 @@ def main() -> None:
 
     with st.sidebar:
         st.header("Cấu hình")
+        selected_version = st.selectbox("Version để xem", VERSIONS, index=1)
         provider_name = st.selectbox("Provider", PROVIDERS, index=0)
         model = st.text_input(
             "Model (để trống dùng mặc định)",
             value=DEFAULT_MODELS.get(provider_name, ""),
         ).strip() or None
+        st.caption("Version selector dùng để xem bằng chứng eval. Chat chạy bằng prompt/tools hiện có trong workspace.")
         st.caption("API keys được đọc từ starter_v0/.env. Không nhập hoặc chia sẻ API key trong chat.")
         st.warning(
             "Các tool tìm kiếm có thể gọi dịch vụ/API thật. Gửi Telegram bị tắt trong UI demo."
         )
         if st.button("Xóa hội thoại", use_container_width=True):
             st.session_state["conversation"] = []
+
+    st.subheader(f"Bằng chứng phiên bản {selected_version}")
+    version_entry, version_run = load_version_evidence(selected_version)
+    if version_run:
+        summary = version_run.get("summary", {})
+        metrics = st.columns(4)
+        metrics[0].metric(
+            "Case accuracy",
+            f"{summary.get('case_accuracy', 0) * 100:.0f}%",
+            f"{summary.get('passed_cases', 0)}/{summary.get('total_cases', 0)} cases",
+        )
+        metrics[1].metric(
+            "Tool routing",
+            f"{summary.get('tool_routing_accuracy', 0) * 100:.0f}%",
+        )
+        metrics[2].metric(
+            "Argument accuracy",
+            f"{summary.get('argument_accuracy', 0) * 100:.0f}%",
+        )
+        multiturn = summary.get("multiturn_accuracy")
+        metrics[3].metric(
+            "Multi-turn",
+            f"{multiturn * 100:.0f}%" if multiturn is not None else "N/A",
+        )
+        st.caption(
+            f"Model: {version_run.get('model', 'không rõ')} · "
+            f"Run: {version_entry.get('run_file', 'không rõ') if version_entry else 'không rõ'}"
+        )
+        failures = [
+            result for result in version_run.get("results", [])
+            if not result.get("result", {}).get("passed", False)
+        ]
+        if failures:
+            with st.expander(f"Case chưa đạt ({len(failures)})"):
+                for failure in failures:
+                    details = "; ".join(failure.get("result", {}).get("failures", []))
+                    st.markdown(f"- **{failure.get('id', 'unknown')}**: {details}")
+    elif version_entry:
+        st.warning(
+            f"Đã có version {selected_version} trong version log nhưng chưa tìm thấy run JSON."
+        )
+    else:
+        st.info(f"Chưa có eval/run được ghi nhận cho version {selected_version}.")
 
     if "conversation" not in st.session_state:
         st.session_state["conversation"] = []
