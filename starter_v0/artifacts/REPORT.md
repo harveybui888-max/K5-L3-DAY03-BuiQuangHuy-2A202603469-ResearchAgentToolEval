@@ -16,15 +16,11 @@
 
 ## A1. Agent này làm được gì
 
-> 1–2 câu mô tả agent dùng để làm gì (cho team khác hiểu nhanh).
+Research Agent hỗ trợ tìm tin trên web và mạng xã hội, xem bài đăng gần đây của tài khoản, đọc URL, tra cứu paper arXiv hoặc tài liệu chính sách nội bộ, rồi tổng hợp kết quả thành digest. Agent có thể hỏi lại khi cần thêm thông tin; thao tác gửi Telegram không được bật trong UI demo.
 
-Ví dụ: "Research agent: tìm tin theo từ khóa / theo tài khoản, đọc URL, tổng hợp thành digest, và gửi lên Telegram khi được xác nhận."
+**Link dùng thử:** [https://d01f-14-0-22-183.ngrok-free.app](https://d01f-14-0-22-183.ngrok-free.app)
 
-**Link dùng thử (deploy):**
-
-> Dán link public để team khác mở thử ngay. Cách deploy nhanh bằng Cloudflare Tunnel xem README. Nếu deploy Vercel/Streamlit Cloud thì dán link đó.
->
-> URL: 
+Link ngrok phụ thuộc vào phiên tunnel đang chạy; nếu tunnel dừng hoặc URL thay đổi, hãy cập nhật link này.
 
 ## A2. Tool agent có
 
@@ -32,17 +28,26 @@ Ví dụ: "Research agent: tìm tin theo từ khóa / theo tài khoản, đọc 
 
 | Tên tool | Làm được gì | Tool mới nhóm thêm? |
 |---|---|---|
-| clarify | hỏi lại người dùng khi thiếu thông tin | không |
-|  |  |  |
-|  |  |  |
+| `clarify` | Hỏi người dùng để bổ sung thông tin còn thiếu | Chưa ghi nhận |
+| `timeline` | Lấy bài đăng gần đây của một tài khoản | Chưa ghi nhận |
+| `social_search` | Tìm bài đăng mạng xã hội theo từ khóa, mới nhất hoặc phổ biến | Chưa ghi nhận |
+| `lookup` | Tìm thông tin trên web; hỗ trợ chủ đề tin tức và khoảng thời gian | Chưa ghi nhận |
+| `fetch` | Đọc nội dung từ URL được cung cấp | Chưa ghi nhận |
+| `format` | Định dạng các kết quả đã thu thập thành digest | Chưa ghi nhận |
+| `send` | Gửi nội dung lên Telegram sau khi được xác nhận; bị tắt trong UI demo | Chưa ghi nhận |
+| `policy` | Tìm trong tài liệu chính sách nội bộ của project | Chưa ghi nhận |
+| `papers` | Tìm bài nghiên cứu trên arXiv | Chưa ghi nhận |
+| `paper_text` | Trích xuất văn bản từ paper arXiv | Chưa ghi nhận |
 
 ## A3. Câu hỏi mẫu để thử
 
 > 3–5 câu hỏi/yêu cầu mẫu để team khác tự thử agent ngay.
 
-1.
-2.
-3.
+1. “Tin AI hôm nay có gì nổi bật? Tóm tắt vài nguồn đáng tin.”
+2. “Tìm các bài đăng phổ biến về OpenAI trên Twitter.”
+3. “Đọc và tóm tắt bài này: https://openai.com/research/”
+4. “Tìm paper arXiv về đánh giá AI agent.”
+5. “Tóm tắt các tweet mới nhất của Elon Musk.” (Agent cần hỏi lại nếu chưa rõ tài khoản.)
 
 ---
 
