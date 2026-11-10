@@ -3,5 +3,25 @@
   "dataset_role": "group",
   "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "TOOLV2_DEDUP_01_existing_sources",
+      "phase": "B",
+      "query": "Only remove duplicate sources in these items, preserving the first one. Do not search or format: [{\"title\":\"First\",\"url\":\"https://example.com/a?utm_source=mail\"},{\"title\":\"Again\",\"url\":\"https://example.com/a#intro\"}]",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "deduplicate", "args": {}}]},
+      "metadata": {"what_it_tests": "Route supplied source items to deduplicate instead of search, fetch or format. Exact item forwarding is covered by offline integration tests."}
+    },
+    {
+      "id": "TOOLV2_DEDUP_02_sources_from_context",
+      "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Source items: [{\"title\":\"First\",\"url\":\"https://example.org/a\"},{\"title\":\"Again\",\"url\":\"https://example.org/a?fbclid=x\"}]"},
+        {"role": "user", "content": "Use those items to remove duplicate sources only. Do not build a digest yet."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "deduplicate", "args": {}}]},
+      "metadata": {"what_it_tests": "Route existing context items to the new tool without inventing sources or running an earlier formatting request."}
+    }
+  ]
 }

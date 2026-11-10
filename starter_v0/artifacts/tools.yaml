@@ -123,3 +123,29 @@ tools:
         max_pages: {type: integer, default: 5, description: "Số trang"}
         max_chars: {type: integer, default: 8000, description: "Số ký tự"}
       required: [arxiv_url]
+
+  # ---------------- Tool V2: local source deduplication ----------------
+  - name: deduplicate
+    description: >-
+      Remove duplicate source URLs from existing items before a digest. Use when
+      the user asks to deduplicate sources and items already exist in the request
+      or previous tool results. Preserve the first occurrence, original item order,
+      URLs and metadata. Ignore tracking parameters and fragments when comparing.
+      Local only: does not search, fetch, summarize or format. Never invent items;
+      ask clarify if they are missing. Pass the returned items to format if needed.
+    parameters:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Existing source objects; forward their original fields and URLs unchanged.
+          items:
+            type: object
+            properties:
+              url: {type: string, description: "Absolute HTTP(S) source URL; may be omitted if unknown."}
+              title: {type: string}
+              summary: {type: string}
+              source: {type: string}
+              section: {type: string}
+            additionalProperties: true
+      required: [items]
