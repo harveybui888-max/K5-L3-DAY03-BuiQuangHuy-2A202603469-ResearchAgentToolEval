@@ -5,14 +5,6 @@
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
   "cases": [
     {
-      "id": "TOOLV2_DEDUP_01_existing_sources",
-      "phase": "B",
-      "query": "Only remove duplicate sources in these items, preserving the first one. Do not search or format: [{\"title\":\"First\",\"url\":\"https://example.com/a?utm_source=mail\"},{\"title\":\"Again\",\"url\":\"https://example.com/a#intro\"}]",
-      "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "deduplicate", "args": {}}]},
-      "metadata": {"what_it_tests": "Route supplied source items to deduplicate instead of search, fetch or format. Exact item forwarding is covered by offline integration tests."}
-    },
-    {
       "id": "G01_arxiv_papers_routing",
       "phase": "B",
       "suite": "group",
@@ -49,15 +41,13 @@
       "metadata": {"skill": "dedup_missing_items_clarify", "difficulty": "medium", "what_it_tests": "Yêu cầu deduplicate nhưng chưa cung cấp items → clarify xin dữ liệu, không bịa items hay gọi deduplicate với danh sách rỗng."}
     },
     {
-      "id": "TOOLV2_DEDUP_02_sources_from_context",
+      "id": "G09_dedup_tracking_params",
       "phase": "B",
-      "turns": [
-        {"role": "user", "content": "Source items: [{\"title\":\"First\",\"url\":\"https://example.org/a\"},{\"title\":\"Again\",\"url\":\"https://example.org/a?fbclid=x\"}]"},
-        {"role": "user", "content": "Use those items to remove duplicate sources only. Do not build a digest yet."}
-      ],
+      "suite": "group",
+      "query": "Loại bỏ các nguồn trùng nhau trong các item này, chỉ giữ lần xuất hiện đầu tiên: [{\"title\":\"Bài A\",\"url\":\"https://example.com/news?utm_source=mail\"},{\"title\":\"Bài A bản sao\",\"url\":\"https://example.com/news#top\"}]",
       "failure_type": "wrong_tool",
       "expect": {"tool_calls": [{"name": "deduplicate", "args": {}}]},
-      "metadata": {"what_it_tests": "Route existing context items to the new tool without inventing sources or running an earlier formatting request."}
+      "metadata": {"skill": "dedup_tracking_params", "difficulty": "medium", "what_it_tests": "Hai URL chỉ khác tracking param (utm_*) và fragment → deduplicate, không gọi fetch/lookup."}
     },
     {
       "id": "G05_multiturn_papers_to_paper_text",
@@ -106,6 +96,18 @@
       "failure_type": "missing_info",
       "expect": {"tool_calls": [{"name": "deduplicate", "args": {}}]},
       "metadata": {"skill": "multiturn_dedup_after_items", "difficulty": "hard", "what_it_tests": "Lượt 1 thiếu items (nên clarify), lượt 2 user cung cấp items → route tới deduplicate."}
+    },
+    {
+      "id": "G10_multiturn_dedup_no_format",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Sau khi tìm xong, giúp mình loại bỏ các nguồn trùng lặp trong kết quả"},
+        {"role": "user", "content": "Đây là các item: [{\"title\":\"X\",\"url\":\"https://site.example.com/a?fbclid=123\"},{\"title\":\"Y\",\"url\":\"https://site.example.com/a\"}] — chỉ lọc trùng thôi, chưa cần làm digest"}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "deduplicate", "args": {}}]},
+      "metadata": {"skill": "multiturn_dedup_no_format", "difficulty": "hard", "what_it_tests": "Lượt 2 cung cấp items + yêu cầu chỉ lọc trùng (không format) → deduplicate, không chạy format/lookup."}
     }
   ]
 }
