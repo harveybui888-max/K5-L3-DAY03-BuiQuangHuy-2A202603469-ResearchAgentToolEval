@@ -10,6 +10,8 @@
 - Team: K5-L3-DAY03
 - Members: BuiQuangHuy (2A202603469)
   PhamQuangTruong(2A202603378)
+  NguyenDucTrong (2A202603367)
+  NguyenQuocHung (2A202603553)
 - Provider/model: OpenRouter / `openai/gpt-4o-mini`
 
 ---
