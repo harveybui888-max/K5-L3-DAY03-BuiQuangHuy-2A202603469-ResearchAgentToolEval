@@ -16,7 +16,7 @@
 
 ## A1. Agent này làm được gì
 
-Research Agent hỗ trợ tìm tin trên web và mạng xã hội, xem bài đăng gần đây của tài khoản, đọc URL, tra cứu paper arXiv hoặc tài liệu chính sách nội bộ, rồi tổng hợp kết quả thành digest. Agent có thể hỏi lại khi cần thêm thông tin; thao tác gửi Telegram không được bật trong UI demo.
+**Bản demo v1 (OpenRouter / `openai/gpt-4o-mini`):** Research Agent tìm tin trên web và mạng xã hội, xem bài đăng của tài khoản, đọc URL, tra cứu paper arXiv hoặc chính sách nội bộ, rồi tổ chức kết quả thành digest. Prompt v1 yêu cầu hỏi lại khi thiếu thông tin, không tự đoán username/URL, và cần người dùng xác nhận trước hành động gửi; gửi Telegram hiện bị chặn trong UI demo. Tool `deduplicate` mới loại URL nguồn trùng khỏi các item đã có mà không tìm kiếm hay thay đổi nội dung nguồn.
 
 **Link dùng thử:** [https://d01f-14-0-22-183.ngrok-free.app](https://d01f-14-0-22-183.ngrok-free.app)
 
@@ -28,26 +28,27 @@ Link ngrok phụ thuộc vào phiên tunnel đang chạy; nếu tunnel dừng ho
 
 | Tên tool | Làm được gì | Tool mới nhóm thêm? |
 |---|---|---|
-| `clarify` | Hỏi người dùng để bổ sung thông tin còn thiếu | Chưa ghi nhận |
-| `timeline` | Lấy bài đăng gần đây của một tài khoản | Chưa ghi nhận |
-| `social_search` | Tìm bài đăng mạng xã hội theo từ khóa, mới nhất hoặc phổ biến | Chưa ghi nhận |
-| `lookup` | Tìm thông tin trên web; hỗ trợ chủ đề tin tức và khoảng thời gian | Chưa ghi nhận |
-| `fetch` | Đọc nội dung từ URL được cung cấp | Chưa ghi nhận |
-| `format` | Định dạng các kết quả đã thu thập thành digest | Chưa ghi nhận |
-| `send` | Gửi nội dung lên Telegram sau khi được xác nhận; bị tắt trong UI demo | Chưa ghi nhận |
-| `policy` | Tìm trong tài liệu chính sách nội bộ của project | Chưa ghi nhận |
-| `papers` | Tìm bài nghiên cứu trên arXiv | Chưa ghi nhận |
-| `paper_text` | Trích xuất văn bản từ paper arXiv | Chưa ghi nhận |
+| `clarify` | Hỏi lại khi thiếu thông tin hoặc cần xác nhận rõ ràng | Không |
+| `timeline` | Lấy bài đăng gần đây từ username tài khoản đã được cung cấp | Không |
+| `social_search` | Tìm bài đăng công khai theo chủ đề, mới nhất hoặc phổ biến | Không |
+| `lookup` | Tìm kiếm web; hỗ trợ tìm tin tức theo khoảng thời gian | Không |
+| `fetch` | Đọc nội dung của URL đã được cung cấp hoặc tìm thấy từ nguồn đáng tin | Không |
+| `format` | Trình bày các item đã có thành digest; không tự tìm dữ liệu | Không |
+| `send` | Gửi nội dung ra ngoài sau khi xác nhận; bị chặn trong UI demo | Không |
+| `policy` | Tìm trong bộ tài liệu chính sách nội bộ của project | Không |
+| `papers` | Tìm paper học thuật trên arXiv | Không |
+| `paper_text` | Lấy nội dung văn bản của paper arXiv theo ID hoặc URL | Không |
+| `deduplicate` | Loại URL trùng khỏi danh sách item có sẵn, giữ lại thứ tự và metadata của nguồn đầu tiên | Có — tool mới v1 |
 
 ## A3. Câu hỏi mẫu để thử
 
 > 3–5 câu hỏi/yêu cầu mẫu để team khác tự thử agent ngay.
 
-1. “Tin AI hôm nay có gì nổi bật? Tóm tắt vài nguồn đáng tin.”
-2. “Tìm các bài đăng phổ biến về OpenAI trên Twitter.”
+1. “Tìm tin tức AI trong ngày hôm nay và tóm tắt các nguồn chính.”
+2. “Tìm các bài đăng phổ biến về OpenAI trên mạng xã hội.”
 3. “Đọc và tóm tắt bài này: https://openai.com/research/”
 4. “Tìm paper arXiv về đánh giá AI agent.”
-5. “Tóm tắt các tweet mới nhất của Elon Musk.” (Agent cần hỏi lại nếu chưa rõ tài khoản.)
+5. “Loại URL trùng khỏi các nguồn vừa tìm rồi tạo digest.” (Thử sau khi đã yêu cầu agent tìm nguồn.)
 
 ---
 
