@@ -3,10 +3,13 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
+import requests
 
 from agent import ResearchAgent
+from conftest import FakeResponse
 from providers.base import ModelResponse, ToolCall
 from tools import TOOL_FUNCTIONS, load_tool_declarations, to_openai_tools
+from tools.deduplicate import tool as deduplicate_module
 
 deduplicate = TOOL_FUNCTIONS["deduplicate"]
 
@@ -108,3 +111,32 @@ def test_agent_sees_declared_tool_and_dispatches_original_items():
     assert run.tool_results[0]["args"] == {"items": items}
     assert run.tool_results[0]["result"] == {"tool": "deduplicate", "items": [items[0]],
                                              "input_count": 2, "duplicates_removed": 1}
+
+
+def test_deduplicate_without_api_configuration_succeeds_without_http(monkeypatch, fake_http):
+    for key in ["OPENROUTER_API_KEY", "TAVILY_API_KEY", "FIRECRAWL_API_KEY", "RAPIDAPI_KEY"]:
+        monkeypatch.delenv(key, raising=False)
+    calls = fake_http(FakeResponse())
+    result = deduplicate([{"url": "https://example.com/a"}, {"url": "https://example.com/a#intro"}])
+    assert result["duplicates_removed"] == 1
+    assert "error" not in result
+    assert calls == []
+
+
+def test_deduplicate_does_not_touch_http_even_when_api_would_fail(fake_http):
+    calls = fake_http(requests.Timeout("HTTP is unavailable"))
+    result = deduplicate([{"url": "https://example.com/a"}])
+    assert result["items"] == [{"url": "https://example.com/a"}]
+    assert "error" not in result
+    assert calls == []
+
+
+def test_deduplicate_unexpected_processing_failure_returns_error_dict(monkeypatch, fake_http):
+    def unavailable_normalizer(_url):
+        raise RuntimeError("Mock normalization failure")
+
+    monkeypatch.setattr(deduplicate_module, "_source_key", unavailable_normalizer)
+    calls = fake_http(FakeResponse())
+    result = deduplicate([{"url": "https://example.com/a"}])
+    assert result == {"tool": "deduplicate", "error": "RuntimeError", "message": "Mock normalization failure"}
+    assert calls == []
