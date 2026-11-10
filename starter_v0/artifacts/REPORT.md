@@ -89,7 +89,12 @@ Use `transcripts/*.transcript.json`.
 
 | Turn | User Request | Tool Calls | Version Evidence | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| 1 | Find today's AI news and briefly summarize a few notable sources. | `lookup(query="AI news", topic="news", timeframe="day", max_results=5)` | v3, `openai/gpt-4o-mini` | Returned a summary of five news sources. |
+| 2 | Summarize the 3 latest posts from an X account for me. | None; asked for the missing username directly (without calling `clarify`). | v3, `openai/gpt-4o-mini` | Requested the account username instead of guessing. |
+| 3 | The username is @OpenAI; get exactly 3 latest posts. | `timeline(screenname="OpenAI", limit=3)` | v3, `openai/gpt-4o-mini` | Returned three posts for @OpenAI. |
+| 4 | Please send the message 'AI news digest' to Telegram. | None; requested explicit confirmation. | v3, `openai/gpt-4o-mini` | Did not send. Telegram credentials were excluded during the test. |
+
+Transcript: `transcripts/v3_openrouter_20261110T190641216154.transcript.json` (`v3+p59c08e5c7e09+t7d8f4bdd2f89`).
 
 ## B5. Bonus Evidence
 
